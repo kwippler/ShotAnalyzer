@@ -9,7 +9,6 @@
         canvas { image-rendering: auto; }
         .no-select { user-select: none; }
         
-        /* Subtile Bildlaufleiste für das Steuerungspanel bei extrem kleinen Fenstern */
         .panel-scroll::-webkit-scrollbar {
             width: 4px;
         }
@@ -30,7 +29,7 @@
         <!-- Kopfzeile -->
         <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-4">
-                <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-1 italic text-zinc-400">v5.0</span></h1>
+                <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-1 italic text-zinc-400">v5.1r</span></h1>
             </div>
             <div class="flex gap-2">
                 <input type="file" id="imageLoader" class="hidden" accept="image/*">
@@ -42,10 +41,9 @@
         </header>
 
         <main class="flex-1 flex overflow-hidden min-h-0">
-            <!-- Erweitertes Steuerungspanel (Zweispaltig) -->
+            <!-- Zweispaltiges Bedienfeld -->
             <aside class="w-[580px] border-r border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0 overflow-hidden">
                 
-                <!-- Spalten-Container -->
                 <div class="flex-1 overflow-y-auto p-4 panel-scroll min-h-0">
                     <div class="grid grid-cols-2 gap-6">
                         
@@ -86,7 +84,7 @@
                                         <input type="number" id="distance" value="100" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs font-mono text-white focus:border-red-500 outline-none">
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] text-zinc-500 mb-1 uppercase text-white">Zoom</label>
+                                        <label class="block text-[10px] text-zinc-500 mb-1 uppercase text-white">Vergrößerung</label>
                                         <input type="range" id="viewScale" min="1" max="5" step="0.1" value="1" oninput="updateView()" class="w-full accent-red-500 cursor-pointer h-4">
                                     </div>
                                     <div>
@@ -133,10 +131,10 @@
                     </div>
                 </div>
 
-                <!-- Fixierter Unterbereich: Justierung & Statistik -->
+                <!-- Fixierter Unterbereich -->
                 <div class="p-4 bg-zinc-900 border-t border-zinc-800 shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.6)]">
                     <div class="grid grid-cols-2 gap-4 items-center">
-                        <button id="adjustmentBtn" onclick="toggleAdjustmentMode()" class="py-3 bg-zinc-100 hover:bg-white rounded text-xs font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl">
+                        <button id="adjustmentBtn" onclick="toggleAdjustmentMode()" class="py-3 bg-zinc-100 hover:bg-white rounded text-xs font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl w-full">
                             Feinjustierung
                         </button>
                         <div class="flex justify-between items-center font-mono text-white bg-black/40 p-2 rounded border border-zinc-800">
@@ -144,7 +142,7 @@
                             <span id="shotCounter" class="text-xl font-bold text-red-500 leading-none">0</span>
                         </div>
                     </div>
-                </div>
+                1</div>
             </aside>
 
             <!-- Analysebereich -->
@@ -171,6 +169,7 @@
             shots: [], pendingShot: null, pixelPerMm: 0.2, isPoaLocked: false, isPoaSetting: false,
             viewScale: 1, isCropMode: false, cropStart: null, cropEnd: null,
             isCalibrating: false, calPoints: [], isAdjustmentActive: false, draggedShotIndex: -1,
+            mousePos: { x: 0, y: 0 },
             legend: { x: 50, y: 50, w: 550, h: 100, isDragging: false, dragOff: { x: 0, y: 0 } }
         };
 
@@ -325,6 +324,7 @@
         function onMouseMove(e) {
             if (!state.image) return;
             const pos = getMousePos(e);
+            state.mousePos = pos;
             if (state.isCropMode && state.cropStart) state.cropEnd = pos;
             if (state.legend.isDragging) { state.legend.x = pos.x - state.legend.dragOff.x; state.legend.y = pos.y - state.legend.dragOff.y; }
             if (state.draggedShotIndex !== -1) { state.shots[state.draggedShotIndex].x = pos.x; state.shots[state.draggedShotIndex].y = pos.y; updateStats(); }
@@ -402,26 +402,43 @@
         function drawLoop() {
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             if (!state.image) { requestAnimationFrame(drawLoop); return; }
+            
             bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height); 
             bCtx.drawImage(state.image, 0, 0);
+            
             const rPx = ((parseFloat(document.getElementById('bulletDiameter').value) || 5.56) / state.pixelPerMm) / 2;
+            
+            // Fadenkreuz bei aktiver Interaktion
+            if (!state.legend.isDragging && state.draggedShotIndex === -1) {
+                oCtx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                oCtx.lineWidth = 0.5;
+                oCtx.beginPath();
+                oCtx.moveTo(state.mousePos.x, 0); oCtx.lineTo(state.mousePos.x, state.image.height);
+                oCtx.moveTo(0, state.mousePos.y); oCtx.lineTo(state.image.width, state.mousePos.y);
+                oCtx.stroke();
+            }
+
             if (state.calPoints.length > 0) {
                 oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 2;
                 state.calPoints.forEach(p => { oCtx.beginPath(); oCtx.moveTo(p.x-10, p.y); oCtx.lineTo(p.x+10, p.y); oCtx.moveTo(p.x, p.y-10); oCtx.lineTo(p.x, p.y+10); oCtx.stroke(); });
             }
+            
             oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 3; oCtx.beginPath();
             oCtx.moveTo(state.poa.x-40, state.poa.y); oCtx.lineTo(state.poa.x+40, state.poa.y); oCtx.moveTo(state.poa.x, state.poa.y-40); oCtx.lineTo(state.poa.x, state.poa.y+40); oCtx.stroke();
+            
             state.shots.forEach((shot, index) => {
                 const isDragged = (state.draggedShotIndex === index);
                 oCtx.fillStyle = isDragged ? 'rgba(255, 165, 0, 0.85)' : 'rgba(173, 216, 230, 0.7)';
                 oCtx.beginPath(); oCtx.arc(shot.x, shot.y, rPx, 0, Math.PI * 2); oCtx.fill();
                 oCtx.strokeStyle = isDragged ? 'white' : 'rgba(173, 216, 230, 0.95)'; oCtx.lineWidth = isDragged ? 3 : 1.5; oCtx.stroke();
             });
+            
             if (state.pendingShot && !state.isAdjustmentActive) { 
                 oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)'; 
                 oCtx.beginPath(); oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2); oCtx.fill(); 
                 oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 2; oCtx.stroke(); 
             }
+            
             const stats = calculateBallistics();
             if (stats) {
                 if (state.shots.length >= 2) {
@@ -434,9 +451,18 @@
                 drawLegend(stats);
             }
             drawScaleRuler();
+            
+            // Maskiertes Ausschnittsfenster
             if (state.isCropMode && state.cropStart && state.cropEnd) {
-                oCtx.strokeStyle = '#ef4444'; oCtx.setLineDash([5, 5]); oCtx.lineWidth = 2;
                 const x = Math.min(state.cropStart.x, state.cropEnd.x), y = Math.min(state.cropStart.y, state.cropEnd.y), w = Math.abs(state.cropStart.x - state.cropEnd.x), h = Math.abs(state.cropStart.y - state.cropEnd.y);
+                
+                oCtx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                oCtx.beginPath();
+                oCtx.rect(0, 0, state.image.width, state.image.height);
+                oCtx.rect(x, y, w, h);
+                oCtx.fill('evenodd');
+
+                oCtx.strokeStyle = '#ef4444'; oCtx.setLineDash([5, 5]); oCtx.lineWidth = 2;
                 oCtx.strokeRect(x, y, w, h); oCtx.setLineDash([]);
             }
             requestAnimationFrame(drawLoop);
