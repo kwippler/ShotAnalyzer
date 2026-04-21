@@ -5,16 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ShotAnalyst - Präzisions-Ballistik-Analysator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        canvas { image-rendering: pixelated; }
+        .no-select { user-select: none; }
+    </style>
 </head>
-<body class="bg-zinc-900 text-zinc-100 min-h-screen flex flex-col font-sans select-none overflow-hidden">
+<body class="bg-zinc-900 text-zinc-100 min-h-screen flex flex-col font-sans no-select overflow-hidden">
 
     <!-- Kopfzeile -->
     <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-tight text-red-500">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2">v4.2 Vorschau-Erweiterung</span></h1>
+        <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2 italic">v4.2 Maschinenbau-Edition</span></h1>
         <div class="flex gap-2">
             <input type="file" id="imageLoader" class="hidden" accept="image/*">
             <button onclick="document.getElementById('imageLoader').click()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm transition font-medium text-white">Bild laden</button>
-            <button onclick="resetApp()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-orange-400">System-Reset</button>
+            <button onclick="resetApp()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-orange-400">System-Rücksetzung</button>
             <button onclick="exportToExcel()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-green-500">Excel Export</button>
             <button onclick="exportResult()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-bold transition text-white shadow-lg">JPG Export</button>
         </div>
@@ -68,22 +72,22 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Bild-Zoom</label>
-                        <input type="range" id="viewScale" min="1" max="5" step="0.1" value="1" oninput="updateView()" class="w-full accent-red-500">
+                        <input type="range" id="viewScale" min="1" max="5" step="0.1" value="1" oninput="updateView()" class="w-full accent-red-500 cursor-pointer">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Infofenster-Größe</label>
-                        <input type="range" id="legendScale" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-red-500">
+                        <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Größe Infofenster</label>
+                        <input type="range" id="legendScale" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-red-500 cursor-pointer">
                     </div>
                 </div>
             </section>
 
-            <!-- 5. HALTEPUNKT -->
+            <!-- 5. REFERENZIERUNG -->
             <section class="space-y-3">
                 <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">5. Referenzierung</label>
                 <div class="space-y-2">
                     <button onclick="activatePoaSetting()" class="w-full py-2 px-3 bg-red-900/10 border border-red-500/30 rounded text-xs text-left flex justify-between items-center hover:bg-red-900/20 transition text-red-100">
                         <span>Haltepunkt (POA) setzen</span>
-                        <span id="poaStatus" class="text-red-500 font-bold uppercase text-[10px]">Ready</span>
+                        <span id="poaStatus" class="text-red-500 font-bold uppercase text-[10px]">Bereit</span>
                     </button>
                     <button onclick="togglePoaLock()" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-left flex justify-between items-center hover:bg-zinc-700 transition text-white">
                         <span>Position fixieren</span>
@@ -122,7 +126,7 @@
 
         <!-- Hauptbereich -->
         <div class="flex-1 relative bg-zinc-950 flex items-center justify-center p-4 overflow-hidden" id="viewport">
-            <div id="canvasStack" class="relative flex items-center justify-center">
+            <div id="canvasStack" class="relative flex items-center justify-center shadow-2xl">
                 <canvas id="baseCanvas" class="absolute"></canvas>
                 <canvas id="overlayCanvas" class="absolute"></canvas>
             </div>
@@ -496,15 +500,10 @@
                 oCtx.lineWidth = isDragged ? 3 : 1.5; oCtx.stroke();
             });
             
-            // --- VORSCHAU FÜR FRISCH DEFINIERTEN TREFFER ---
             if (state.pendingShot && !state.isAdjustmentActive) {
-                oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)'; // Hellrote transluzente Fläche
-                oCtx.beginPath();
-                oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2);
-                oCtx.fill();
-                oCtx.strokeStyle = '#ef4444';
-                oCtx.lineWidth = 2;
-                oCtx.stroke();
+                oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+                oCtx.beginPath(); oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2); oCtx.fill();
+                oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 2; oCtx.stroke();
             }
             
             const stats = calculateBallistics();
