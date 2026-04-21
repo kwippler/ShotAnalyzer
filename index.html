@@ -9,155 +9,156 @@
         canvas { image-rendering: auto; }
         .no-select { user-select: none; }
         
-        /* Präzise Bildlaufleiste für die Seitenleiste */
-        .seitenleiste-scroll::-webkit-scrollbar {
-            width: 6px;
+        /* Subtile Bildlaufleiste für das Steuerungspanel bei extrem kleinen Fenstern */
+        .panel-scroll::-webkit-scrollbar {
+            width: 4px;
         }
-        .seitenleiste-scroll::-webkit-scrollbar-track {
+        .panel-scroll::-webkit-scrollbar-track {
             background: #09090b;
         }
-        .seitenleiste-scroll::-webkit-scrollbar-thumb {
+        .panel-scroll::-webkit-scrollbar-thumb {
             background: #3f3f46;
             border-radius: 10px;
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen max-h-screen flex items-center justify-center font-sans no-select overflow-hidden p-2 md:p-6">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen max-h-screen flex items-center justify-center font-sans no-select overflow-hidden p-2 md:p-4">
 
-    <!-- Haupt-Gehäuse (Optimiert für 1080p-Umgebungen) -->
-    <div class="w-full h-full max-w-[1880px] max-h-[92vh] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+    <!-- Haupt-Gehäuse (Optimiert für Full-HD 1080p) -->
+    <div class="w-full h-full max-w-[1900px] max-h-[96vh] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
         
-        <!-- Kopfzeile (Fixiert) -->
+        <!-- Kopfzeile -->
         <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center shrink-0">
-            <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2 italic text-zinc-400">v4.9</span></h1>
+            <div class="flex items-center gap-4">
+                <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-1 italic text-zinc-400">v5.0</span></h1>
+            </div>
             <div class="flex gap-2">
                 <input type="file" id="imageLoader" class="hidden" accept="image/*">
-                <button onclick="document.getElementById('imageLoader').click()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm transition font-medium text-white border border-zinc-700">Bildmaterial laden</button>
-                <button onclick="resetApp()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-orange-400">System-Reset</button>
-                <button onclick="exportToExcel()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-green-500">Excel Export</button>
-                <button onclick="exportResult()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-bold transition text-white shadow-lg">JPG Bildausgabe</button>
+                <button onclick="document.getElementById('imageLoader').click()" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs transition font-medium text-white border border-zinc-700">Bild laden</button>
+                <button onclick="resetApp()" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-xs transition font-medium text-orange-400">System-Reset</button>
+                <button onclick="exportToExcel()" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-xs transition font-medium text-green-500">Excel Export</button>
+                <button onclick="exportResult()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-xs font-bold transition text-white shadow-lg">JPG Bildausgabe</button>
             </div>
         </header>
 
         <main class="flex-1 flex overflow-hidden min-h-0">
-            <!-- Seitenleiste mit strikter vertikaler Segmentierung -->
-            <aside class="w-80 border-r border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0">
+            <!-- Erweitertes Steuerungspanel (Zweispaltig) -->
+            <aside class="w-[580px] border-r border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0 overflow-hidden">
                 
-                <!-- Oberer Bereich: Dynamischer Inhalts-Scroll -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-8 seitenleiste-scroll min-h-0">
-                    
-                    <!-- 1. BILDVORBEREITUNG -->
-                    <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">1. Vorbereitung</label>
-                        <div class="space-y-2">
-                            <button onclick="toggleCropMode()" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs transition border border-zinc-700 flex justify-between px-3 items-center text-white">
-                                <span>Bildausschnitt</span>
-                                <span id="cropStatus" class="text-zinc-500 font-mono italic">Inaktiv</span>
-                            </button>
-                            <button onclick="resetCrop()" class="w-full py-2 bg-zinc-900 hover:bg-zinc-800 rounded text-[10px] transition border border-zinc-800 text-zinc-400 uppercase tracking-tighter">
-                                Ausschnitt zurücksetzen
-                            </button>
-                        </div>
-                    </section>
+                <!-- Spalten-Container -->
+                <div class="flex-1 overflow-y-auto p-4 panel-scroll min-h-0">
+                    <div class="grid grid-cols-2 gap-6">
+                        
+                        <!-- Linke Spalte: Konfiguration -->
+                        <div class="space-y-6">
+                            <section class="space-y-3">
+                                <label class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">1. Vorbereitung</label>
+                                <div class="space-y-2">
+                                    <button onclick="toggleCropMode()" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs transition border border-zinc-700 flex justify-between px-3 items-center text-white">
+                                        <span>Bildausschnitt</span>
+                                        <span id="cropStatus" class="text-zinc-500 font-mono italic text-[10px]">Inaktiv</span>
+                                    </button>
+                                    <button onclick="resetCrop()" class="w-full py-1 bg-zinc-900 hover:bg-zinc-800 rounded text-[9px] transition border border-zinc-800 text-zinc-400 uppercase">
+                                        Ausschnitt Reset
+                                    </button>
+                                </div>
+                            </section>
 
-                    <!-- 2. METROLOGIE -->
-                    <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">2. Metrologie</label>
-                        <div class="space-y-2">
-                            <button onclick="startCalibration()" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-left flex justify-between items-center hover:bg-zinc-700 transition text-white">
-                                <span>Maßstabskalierung</span>
-                                <span id="calPointCounter" class="text-red-500 font-mono font-bold">0/2</span>
-                            </button>
-                        </div>
-                        <div class="p-2 bg-zinc-900 rounded border border-zinc-800 text-[10px] font-mono text-green-500 flex justify-between">
-                            <span>Maßstab:</span>
-                            <span id="statScaleVal">-</span>
-                        </div>
-                    </section>
+                            <section class="space-y-3">
+                                <label class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">2. Metrologie</label>
+                                <div class="space-y-2">
+                                    <button onclick="startCalibration()" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-left flex justify-between items-center hover:bg-zinc-700 transition text-white">
+                                        <span>Kalibrierung</span>
+                                        <span id="calPointCounter" class="text-red-500 font-mono font-bold text-[10px]">0/2</span>
+                                    </button>
+                                    <div class="p-2 bg-zinc-900 rounded border border-zinc-800 text-[10px] font-mono text-green-500 flex justify-between">
+                                        <span>Maßstab:</span>
+                                        <span id="statScaleVal">-</span>
+                                    </div>
+                                </div>
+                            </section>
 
-                    <!-- 3. PARAMETER -->
-                    <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">3. Einstellwerte</label>
-                        <div>
-                            <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Entfernung (m)</label>
-                            <input type="number" id="distance" value="100" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm font-mono text-white focus:border-red-500 outline-none">
+                            <section class="space-y-3">
+                                <label class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">3. Einstellwerte</label>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-[10px] text-zinc-500 mb-1 uppercase text-white">Entfernung (m)</label>
+                                        <input type="number" id="distance" value="100" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs font-mono text-white focus:border-red-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-zinc-500 mb-1 uppercase text-white">Zoom</label>
+                                        <input type="range" id="viewScale" min="1" max="5" step="0.1" value="1" oninput="updateView()" class="w-full accent-red-500 cursor-pointer h-4">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] text-zinc-500 mb-1 uppercase text-white">Skalierung Protokoll</label>
+                                        <input type="range" id="legendScale" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-red-500 cursor-pointer h-4">
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                    </section>
 
-                    <!-- 4. VISUALISIERUNG -->
-                    <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">4. Visualisierung</label>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Vergrößerung (Zoom)</label>
-                                <input type="range" id="viewScale" min="1" max="5" step="0.1" value="1" oninput="updateView()" class="w-full accent-red-500 cursor-pointer">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Legenden-Skalierung</label>
-                                <input type="range" id="legendScale" min="0.5" max="2.0" step="0.1" value="1.0" class="w-full accent-red-500 cursor-pointer">
-                            </div>
-                        </div>
-                    </section>
+                        <!-- Rechte Spalte: Datenerfassung -->
+                        <div class="space-y-6">
+                            <section class="space-y-3">
+                                <label class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">4. Referenzierung</label>
+                                <div class="space-y-2">
+                                    <button onclick="activatePoaSetting()" class="w-full py-2 px-3 bg-red-900/10 border border-red-500/30 rounded text-xs text-left flex justify-between items-center hover:bg-red-900/20 transition text-red-100">
+                                        <span>POA setzen</span>
+                                        <span id="poaStatus" class="text-red-500 font-bold uppercase text-[9px]">Bereit</span>
+                                    </button>
+                                    <button onclick="togglePoaLock()" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-left flex justify-between items-center hover:bg-zinc-700 transition text-white">
+                                        <span>Fixieren</span>
+                                        <span id="poaLockStatus" class="text-zinc-500 uppercase font-bold text-[9px]">Aus</span>
+                                    </button>
+                                </div>
+                            </section>
 
-                    <!-- 5. REFERENZIERUNG -->
-                    <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">5. Referenzierung</label>
-                        <div class="space-y-2">
-                            <button onclick="activatePoaSetting()" class="w-full py-2 px-3 bg-red-900/10 border border-red-500/30 rounded text-xs text-left flex justify-between items-center hover:bg-red-900/20 transition text-red-100">
-                                <span>Haltepunkt (POA) setzen</span>
-                                <span id="poaStatus" class="text-red-500 font-bold uppercase text-[10px]">Bereit</span>
-                            </button>
-                            <button onclick="togglePoaLock()" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-left flex justify-between items-center hover:bg-zinc-700 transition text-white">
-                                <span>Position fixieren</span>
-                                <span id="poaLockStatus" class="text-zinc-500 uppercase font-bold text-[10px]">Aus</span>
-                            </button>
+                            <section class="space-y-3">
+                                <label class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">5. Aufnahme</label>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="block text-[10px] text-zinc-500 mb-1 uppercase text-white">Kaliber (mm)</label>
+                                        <input type="number" id="bulletDiameter" value="5.56" step="0.01" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs font-mono text-red-500 focus:border-red-500 outline-none">
+                                    </div>
+                                    <button id="confirmBtn" onclick="confirmLastShot()" class="w-full py-4 bg-red-600 hover:bg-red-500 rounded text-xs font-bold transition text-white shadow-md disabled:opacity-30">
+                                        TREFFER BESTÄTIGEN
+                                    </button>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <button onclick="undoLastShot()" class="py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-[10px] transition border border-zinc-700 text-white">Rückgängig</button>
+                                        <button onclick="clearShots()" class="py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-[10px] text-red-400 transition border border-zinc-700">Löschen</button>
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                    </section>
-
-                    <!-- 6. DATENERFASSUNG -->
-                    <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">6. Datenerfassung</label>
-                        <div class="space-y-2">
-                            <div>
-                                <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Kaliber (mm)</label>
-                                <input type="number" id="bulletDiameter" value="5.56" step="0.01" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm font-mono text-red-500 focus:border-red-500 outline-none">
-                            </div>
-                            <button id="confirmBtn" onclick="confirmLastShot()" class="w-full py-3 bg-red-600 hover:bg-red-500 rounded text-sm font-bold transition text-white shadow-md disabled:opacity-30 disabled:cursor-not-allowed">
-                                Treffer erfassen
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="undoLastShot()" class="py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs transition border border-zinc-700 text-white">Rückgängig</button>
-                            <button onclick="clearShots()" class="py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-red-400 transition border border-zinc-700">Löschen</button>
-                        </div>
-                    </section>
+                    </div>
                 </div>
 
-                <!-- Unterer Bereich: Fixierte Feinjustierung & Statistik -->
-                <div class="p-6 bg-zinc-900 border-t border-zinc-800 shrink-0 space-y-4 shadow-[0_-4px_12px_rgba(0,0,0,0.5)]">
-                    <button id="adjustmentBtn" onclick="toggleAdjustmentMode()" class="w-full py-3 bg-zinc-100 hover:bg-white rounded text-sm font-bold transition text-zinc-950 uppercase tracking-tighter">
-                        Feinjustierung
-                    </button>
-                    <div class="flex justify-between items-center font-mono text-white">
-                        <span class="text-xs uppercase text-zinc-500">Stichprobe (n):</span>
-                        <span id="shotCounter" class="text-2xl font-bold text-red-500">0</span>
+                <!-- Fixierter Unterbereich: Justierung & Statistik -->
+                <div class="p-4 bg-zinc-900 border-t border-zinc-800 shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.6)]">
+                    <div class="grid grid-cols-2 gap-4 items-center">
+                        <button id="adjustmentBtn" onclick="toggleAdjustmentMode()" class="py-3 bg-zinc-100 hover:bg-white rounded text-xs font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl">
+                            Feinjustierung
+                        </button>
+                        <div class="flex justify-between items-center font-mono text-white bg-black/40 p-2 rounded border border-zinc-800">
+                            <span class="text-[10px] uppercase text-zinc-500">Schussanzahl n:</span>
+                            <span id="shotCounter" class="text-xl font-bold text-red-500 leading-none">0</span>
+                        </div>
                     </div>
                 </div>
             </aside>
 
-            <!-- Zentraler Analysebereich -->
-            <div class="flex-1 relative bg-black flex items-center justify-center p-8 overflow-hidden min-w-0" id="viewport">
+            <!-- Analysebereich -->
+            <div class="flex-1 relative bg-black flex items-center justify-center p-4 overflow-hidden min-w-0" id="viewport">
                 <div id="canvasStack" class="relative flex items-center justify-center transition-transform duration-200 ease-out origin-center">
                     <canvas id="baseCanvas" class="absolute shadow-2xl"></canvas>
                     <canvas id="overlayCanvas" class="absolute"></canvas>
                 </div>
                 
-                <!-- Kalibrierungs-Overlay -->
-                <div id="calibrationDialog" class="hidden absolute top-10 bg-zinc-950 border border-red-500 p-6 rounded-lg shadow-2xl z-50 text-white">
-                    <p class="text-sm mb-3 font-bold uppercase tracking-widest text-center">Referenzstrecke (mm)</p>
+                <div id="calibrationDialog" class="hidden absolute top-6 bg-zinc-950 border border-red-500 p-5 rounded-lg shadow-2xl z-50 text-white">
+                    <p class="text-[10px] mb-2 font-bold uppercase tracking-widest text-center text-red-500">Referenzstrecke (mm)</p>
                     <div class="flex items-center gap-2">
-                        <input type="number" id="calInput" value="50" class="bg-zinc-900 border border-zinc-700 p-2 text-sm w-32 text-white font-mono outline-none focus:border-red-500">
-                        <button onclick="confirmCalibration()" class="bg-red-600 px-6 py-2 rounded text-sm font-bold text-white uppercase transition hover:bg-red-500">Übernehmen</button>
+                        <input type="number" id="calInput" value="50" class="bg-zinc-900 border border-zinc-700 p-1.5 text-xs w-24 text-white font-mono outline-none focus:border-red-500">
+                        <button onclick="confirmCalibration()" class="bg-red-600 px-4 py-1.5 rounded text-[10px] font-bold text-white uppercase transition hover:bg-red-500">Übernehmen</button>
                     </div>
                 </div>
             </div>
@@ -199,7 +200,7 @@
         }
 
         function resetApp() {
-            if(!confirm("Projekt-Daten unwiderruflich löschen?")) return;
+            if(!confirm("Gesamtes Projekt unwiderruflich löschen?")) return;
             state.image = null; state.originalImage = null; state.shots = [];
             state.pendingShot = null; state.pixelPerMm = 0.2; state.isAdjustmentActive = false;
             state.cropOffset = { x: 0, y: 0 }; state.calPoints = [];
@@ -210,7 +211,7 @@
 
         function initializeView(img) {
             const viewport = document.getElementById('viewport');
-            const ratio = Math.min((viewport.clientWidth - 80) / img.width, (viewport.clientHeight - 80) / img.height, 1);
+            const ratio = Math.min((viewport.clientWidth - 40) / img.width, (viewport.clientHeight - 40) / img.height, 1);
             const dpr = window.devicePixelRatio || 1;
             
             [baseCanvas, overlayCanvas].forEach(c => {
@@ -247,13 +248,13 @@
             const btn = document.getElementById('adjustmentBtn');
             const confirmBtn = document.getElementById('confirmBtn');
             if (state.isAdjustmentActive) {
-                btn.innerText = "Modus Aktiv";
-                btn.className = "w-full py-3 bg-orange-600 hover:bg-orange-500 rounded text-sm font-bold transition text-white shadow-xl";
+                btn.innerText = "MODUS AKTIV";
+                btn.className = "py-3 bg-orange-600 hover:bg-orange-500 rounded text-xs font-bold transition text-white shadow-xl w-full";
                 confirmBtn.disabled = true;
                 state.pendingShot = null;
             } else {
-                btn.innerText = "Feinjustierung";
-                btn.className = "w-full py-3 bg-zinc-100 hover:bg-white rounded text-sm font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl";
+                btn.innerText = "FEINJUSTIERUNG";
+                btn.className = "py-3 bg-zinc-100 hover:bg-white rounded text-xs font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl w-full";
                 confirmBtn.disabled = false;
             }
         }
@@ -263,7 +264,7 @@
             const cropStatus = document.getElementById('cropStatus');
             if (cropStatus) {
                 cropStatus.innerText = state.isCropMode ? "Aktiv" : "Inaktiv";
-                cropStatus.className = state.isCropMode ? "text-red-500 font-bold italic" : "text-zinc-500 font-mono italic";
+                cropStatus.className = state.isCropMode ? "text-red-500 font-bold italic text-[10px]" : "text-zinc-500 font-mono italic text-[10px]";
             }
             if (!state.isCropMode && state.cropStart && state.cropEnd) applyCrop();
         }
@@ -305,7 +306,7 @@
                 state.legend.isDragging = true; state.legend.dragOff.x = pos.x - state.legend.x;
                 state.legend.dragOff.y = pos.y - state.legend.y; return;
             }
-            if (state.isPoaSetting) { state.poa = pos; state.isPoaSetting = false; document.getElementById('poaStatus').innerText = "OK"; updateStats(); return; }
+            if (state.isPoaSetting) { state.poa = pos; state.isPoaSetting = false; document.getElementById('poaStatus').innerText = "Bereit"; updateStats(); return; }
             if (state.isCropMode) { state.cropStart = pos; return; }
             if (state.isCalibrating) {
                 state.calPoints.push(pos); document.getElementById('calPointCounter').innerText = state.calPoints.length + "/2";
@@ -340,12 +341,12 @@
             };
         }
 
-        function activatePoaSetting() { if (state.isPoaLocked) return; state.isPoaSetting = true; document.getElementById('poaStatus').innerText = "Bereit..."; }
+        function activatePoaSetting() { if (state.isPoaLocked) return; state.isPoaSetting = true; document.getElementById('poaStatus').innerText = "Wählen..."; }
 
         function togglePoaLock() {
             state.isPoaLocked = !state.isPoaLocked; const l = document.getElementById('poaLockStatus');
             l.innerText = state.isPoaLocked ? "Fixiert" : "Aus";
-            l.className = state.isPoaLocked ? "text-green-500 uppercase font-bold text-[10px]" : "text-zinc-500 uppercase font-bold text-[10px]";
+            l.className = state.isPoaLocked ? "text-green-500 uppercase font-bold text-[9px]" : "text-zinc-500 uppercase font-bold text-[9px]";
         }
 
         function confirmLastShot() { if (state.pendingShot && !state.isAdjustmentActive) { state.shots.push({ ...state.pendingShot }); state.pendingShot = null; updateStats(); } }
@@ -484,7 +485,7 @@
             cy += lineH * 0.5; 
             oCtx.fillStyle = 'white'; 
             oCtx.font = `bold ${fSizeReg}px "ui-monospace", monospace`; 
-            oCtx.fillText("ABWEICHUNG ZENTRUM (COI) ZUM HALTEPUNKT (POA)", lx + (15 * scale), cy); cy += lineH;
+            oCtx.fillText("ABWEICHUNG COI ZU POA", lx + (15 * scale), cy); cy += lineH;
             oCtx.font = `${fSizeReg}px "ui-monospace", monospace`; 
             oCtx.fillText(`Linear: ${stats.offset.total.toFixed(2)} mm`, lx + (15 * scale), cy); 
             oCtx.fillText(`Vektor: ${stats.offset.x.toFixed(2)} S / ${stats.offset.y.toFixed(2)} H`, lx + (190 * scale), cy); 
