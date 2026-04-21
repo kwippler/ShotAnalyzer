@@ -14,7 +14,7 @@
 
     <!-- Kopfzeile -->
     <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2 italic">v4.2 Maschinenbau-Edition</span></h1>
+        <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2 italic text-zinc-400">v4.3 Statistische Verifizierung</span></h1>
         <div class="flex gap-2">
             <input type="file" id="imageLoader" class="hidden" accept="image/*">
             <button onclick="document.getElementById('imageLoader').click()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm transition font-medium text-white">Bild laden</button>
@@ -25,9 +25,7 @@
     </header>
 
     <main class="flex-1 flex overflow-hidden">
-        <!-- Seitenleiste -->
         <aside class="w-80 border-r border-zinc-800 p-6 space-y-6 overflow-y-auto bg-zinc-950">
-            
             <!-- 1. BILDVORBEREITUNG -->
             <section class="space-y-3">
                 <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">1. Bildvorbereitung</label>
@@ -117,14 +115,13 @@
                         Justier-Modus
                     </button>
                 </div>
-                <div class="p-3 bg-zinc-950 rounded border border-zinc-800 flex justify-between items-center font-mono">
-                    <span class="text-sm text-zinc-500 uppercase">n:</span>
+                <div class="p-3 bg-zinc-950 rounded border border-zinc-800 flex justify-between items-center font-mono text-white">
+                    <span class="text-sm uppercase">n:</span>
                     <span id="shotCounter" class="text-xl font-bold text-red-500">0</span>
                 </div>
             </section>
         </aside>
 
-        <!-- Hauptbereich -->
         <div class="flex-1 relative bg-zinc-950 flex items-center justify-center p-4 overflow-hidden" id="viewport">
             <div id="canvasStack" class="relative flex items-center justify-center shadow-2xl">
                 <canvas id="baseCanvas" class="absolute"></canvas>
@@ -141,30 +138,11 @@
 
     <script>
         const state = {
-            image: null,
-            originalImage: null,
-            cropOffset: { x: 0, y: 0 },
-            poa: { x: 0, y: 0 },
-            shots: [],
-            pendingShot: null,
-            pixelPerMm: 0.2, 
-            isPoaLocked: false,
-            isPoaSetting: false,
-            viewScale: 1,
-            isCropMode: false,
-            cropStart: null,
-            cropEnd: null,
-            isCalibrating: false,
-            calPoints: [],
-            isAdjustmentActive: false,
-            draggedShotIndex: -1,
-            legend: { 
-                x: 50, y: 50, 
-                w: 550, 
-                h: 100, 
-                isDragging: false, 
-                dragOff: { x: 0, y: 0 } 
-            }
+            image: null, originalImage: null, cropOffset: { x: 0, y: 0 }, poa: { x: 0, y: 0 },
+            shots: [], pendingShot: null, pixelPerMm: 0.2, isPoaLocked: false, isPoaSetting: false,
+            viewScale: 1, isCropMode: false, cropStart: null, cropEnd: null,
+            isCalibrating: false, calPoints: [], isAdjustmentActive: false, draggedShotIndex: -1,
+            legend: { x: 50, y: 50, w: 550, h: 100, isDragging: false, dragOff: { x: 0, y: 0 } }
         };
 
         const baseCanvas = document.getElementById('baseCanvas');
@@ -186,12 +164,7 @@
             const reader = new FileReader();
             reader.onload = (event) => {
                 const img = new Image();
-                img.onload = () => {
-                    state.originalImage = img;
-                    state.image = img;
-                    state.cropOffset = { x: 0, y: 0 };
-                    initializeView(img);
-                };
+                img.onload = () => { state.originalImage = img; state.image = img; state.cropOffset = { x: 0, y: 0 }; initializeView(img); };
                 img.src = event.target.result;
             };
             reader.readAsDataURL(e.target.files[0]);
@@ -231,10 +204,7 @@
             document.getElementById('canvasStack').style.transform = `scale(${state.viewScale})`;
         }
 
-        function toggleAdjustmentMode() {
-            state.isAdjustmentActive = !state.isAdjustmentActive;
-            updateAdjustmentUI();
-        }
+        function toggleAdjustmentMode() { state.isAdjustmentActive = !state.isAdjustmentActive; updateAdjustmentUI(); }
 
         function updateAdjustmentUI() {
             const btn = document.getElementById('adjustmentBtn');
@@ -262,18 +232,14 @@
         }
 
         function applyCrop() {
-            const x = Math.min(state.cropStart.x, state.cropEnd.x);
-            const y = Math.min(state.cropStart.y, state.cropEnd.y);
-            const w = Math.abs(state.cropStart.x - state.cropEnd.x);
-            const h = Math.abs(state.cropStart.y - state.cropEnd.y);
+            const x = Math.min(state.cropStart.x, state.cropEnd.x), y = Math.min(state.cropStart.y, state.cropEnd.y);
+            const w = Math.abs(state.cropStart.x - state.cropEnd.x), h = Math.abs(state.cropStart.y - state.cropEnd.y);
             if (w < 10 || h < 10) return;
-            const temp = document.createElement('canvas');
-            temp.width = w; temp.height = h;
+            const temp = document.createElement('canvas'); temp.width = w; temp.height = h;
             temp.getContext('2d').drawImage(state.image, x, y, w, h, 0, 0, w, h);
             const newImg = new Image();
             newImg.onload = () => {
-                state.image = newImg;
-                state.cropOffset.x += x; state.cropOffset.y += y;
+                state.image = newImg; state.cropOffset.x += x; state.cropOffset.y += y;
                 state.shots = state.shots.map(s => ({ ...s, x: s.x - x, y: s.y - y }));
                 state.poa = { x: state.poa.x - x, y: state.poa.y - y };
                 initializeView(newImg);
@@ -296,39 +262,23 @@
         function onMouseDown(e) {
             const pos = getMousePos(e);
             const lScale = parseFloat(document.getElementById('legendScale').value);
-
             if (pos.x >= state.legend.x && pos.x <= state.legend.x + state.legend.w * lScale &&
                 pos.y >= state.legend.y && pos.y <= state.legend.y + state.legend.h * lScale) {
-                state.legend.isDragging = true;
-                state.legend.dragOff.x = pos.x - state.legend.x;
-                state.legend.dragOff.y = pos.y - state.legend.y;
-                return;
+                state.legend.isDragging = true; state.legend.dragOff.x = pos.x - state.legend.x;
+                state.legend.dragOff.y = pos.y - state.legend.y; return;
             }
-
-            if (state.isPoaSetting) {
-                state.poa = pos; state.isPoaSetting = false;
-                document.getElementById('poaStatus').innerText = "OK";
-                updateStats(); return;
-            }
-
+            if (state.isPoaSetting) { state.poa = pos; state.isPoaSetting = false; document.getElementById('poaStatus').innerText = "OK"; updateStats(); return; }
             if (state.isCropMode) { state.cropStart = pos; return; }
-
             if (state.isCalibrating) {
-                state.calPoints.push(pos);
-                document.getElementById('calPointCounter').innerText = state.calPoints.length + "/2";
-                if (state.calPoints.length === 2) {
-                    document.getElementById('calibrationDialog').classList.remove('hidden');
-                    state.isCalibrating = false;
-                }
+                state.calPoints.push(pos); document.getElementById('calPointCounter').innerText = state.calPoints.length + "/2";
+                if (state.calPoints.length === 2) { document.getElementById('calibrationDialog').classList.remove('hidden'); state.isCalibrating = false; }
                 return;
             }
-
             if (state.isAdjustmentActive) {
                 const threshold = 20 / state.viewScale;
                 state.draggedShotIndex = state.shots.findIndex(s => Math.hypot(s.x - pos.x, s.y - pos.y) < threshold);
                 return;
             }
-
             if (e.shiftKey && !state.isPoaLocked) { state.poa = pos; updateStats(); return; }
             state.pendingShot = { x: pos.x, y: pos.y };
         }
@@ -336,119 +286,68 @@
         function onMouseMove(e) {
             const pos = getMousePos(e);
             if (state.isCropMode && state.cropStart) state.cropEnd = pos;
-            if (state.legend.isDragging) {
-                state.legend.x = pos.x - state.legend.dragOff.x;
-                state.legend.y = pos.y - state.legend.dragOff.y;
-            }
-            if (state.draggedShotIndex !== -1) {
-                state.shots[state.draggedShotIndex].x = pos.x;
-                state.shots[state.draggedShotIndex].y = pos.y;
-                updateStats();
-            }
+            if (state.legend.isDragging) { state.legend.x = pos.x - state.legend.dragOff.x; state.legend.y = pos.y - state.legend.dragOff.y; }
+            if (state.draggedShotIndex !== -1) { state.shots[state.draggedShotIndex].x = pos.x; state.shots[state.draggedShotIndex].y = pos.y; updateStats(); }
         }
 
-        function onMouseUp() {
-            state.legend.isDragging = false; state.draggedShotIndex = -1;
-            if (state.isCropMode) toggleCropMode();
-        }
+        function onMouseUp() { state.legend.isDragging = false; state.draggedShotIndex = -1; if (state.isCropMode) toggleCropMode(); }
 
         function getMousePos(e) {
             const rect = overlayCanvas.getBoundingClientRect();
-            return {
-                x: (e.clientX - rect.left) * (overlayCanvas.width / rect.width),
-                y: (e.clientY - rect.top) * (overlayCanvas.height / rect.height)
-            };
+            return { x: (e.clientX - rect.left) * (overlayCanvas.width / rect.width), y: (e.clientY - rect.top) * (overlayCanvas.height / rect.height) };
         }
 
-        function activatePoaSetting() {
-            if (state.isPoaLocked) return;
-            state.isPoaSetting = true;
-            document.getElementById('poaStatus').innerText = "Klick...";
-        }
+        function activatePoaSetting() { if (state.isPoaLocked) return; state.isPoaSetting = true; document.getElementById('poaStatus').innerText = "Klick..."; }
 
         function togglePoaLock() {
-            state.isPoaLocked = !state.isPoaLocked;
-            const l = document.getElementById('poaLockStatus');
+            state.isPoaLocked = !state.isPoaLocked; const l = document.getElementById('poaLockStatus');
             l.innerText = state.isPoaLocked ? "Fixiert" : "Aus";
             l.className = state.isPoaLocked ? "text-green-500 uppercase font-bold text-[10px]" : "text-zinc-500 uppercase font-bold text-[10px]";
         }
 
-        function confirmLastShot() {
-            if (state.pendingShot && !state.isAdjustmentActive) {
-                state.shots.push({ ...state.pendingShot });
-                state.pendingShot = null;
-                updateStats();
-            }
-        }
-
+        function confirmLastShot() { if (state.pendingShot && !state.isAdjustmentActive) { state.shots.push({ ...state.pendingShot }); state.pendingShot = null; updateStats(); } }
         function undoLastShot() { state.shots.pop(); updateStats(); }
         function clearShots() { state.shots = []; state.pendingShot = null; updateStats(); }
 
-        function startCalibration() {
-            state.isCalibrating = true; state.calPoints = [];
-            document.getElementById('calPointCounter').innerText = "0/2";
-        }
+        function startCalibration() { state.isCalibrating = true; state.calPoints = []; document.getElementById('calPointCounter').innerText = "0/2"; }
 
         function confirmCalibration() {
             const realDist = parseFloat(document.getElementById('calInput').value) || 50;
             const pxDist = Math.hypot(state.calPoints[0].x - state.calPoints[1].x, state.calPoints[0].y - state.calPoints[1].y);
             state.pixelPerMm = realDist / pxDist;
-            document.getElementById('calibrationDialog').classList.add('hidden');
-            document.getElementById('calPointCounter').innerText = "OK";
+            document.getElementById('calibrationDialog').classList.add('hidden'); document.getElementById('calPointCounter').innerText = "OK";
             state.calPoints = []; updateStats();
         }
 
-        function toMoa(mm, distM) { 
-            if (distM <= 0) return 0;
-            return Math.atan(mm / (distM * 1000)) * (180 * 60 / Math.PI);
-        }
+        function toMoa(mm, distM) { if (distM <= 0) return 0; return Math.atan(mm / (distM * 1000)) * (180 * 60 / Math.PI); }
 
         function calculateBallistics() {
-            if (state.shots.length < 1) return null;
-            let sumX = 0, sumY = 0;
-            state.shots.forEach(s => { sumX += s.x; sumY += s.y; });
-            const coi = { x: sumX / state.shots.length, y: sumY / state.shots.length };
+            const n = state.shots.length; if (n < 1) return null;
+            let sumX = 0, sumY = 0; state.shots.forEach(s => { sumX += s.x; sumY += s.y; });
+            const coi = { x: sumX / n, y: sumY / n };
             const distM = parseFloat(document.getElementById('distance').value) || 100;
-            
             let maxDPx = 0;
-            for(let i=0; i<state.shots.length; i++) {
-                for(let j=i+1; j<state.shots.length; j++) {
+            for(let i=0; i<n; i++) {
+                for(let j=i+1; j<n; j++) {
                     const d = Math.hypot(state.shots[i].x - state.shots[j].x, state.shots[i].y - state.shots[j].y);
                     if (d > maxDPx) maxDPx = d;
                 }
             }
             const esMm = maxDPx * state.pixelPerMm;
-
-            let sumRadiusPx = 0;
-            state.shots.forEach(s => { sumRadiusPx += Math.hypot(s.x - coi.x, s.y - coi.y); });
-            const mrMm = (sumRadiusPx / state.shots.length) * state.pixelPerMm;
-            
+            let sumRadiusPx = 0; state.shots.forEach(s => { sumRadiusPx += Math.hypot(s.x - coi.x, s.y - coi.y); });
+            const mrMm = (sumRadiusPx / n) * state.pixelPerMm;
             let sigma = 0;
-            if (state.shots.length >= 2) {
+            if (n >= 2) {
                 let sqDiffX = 0, sqDiffY = 0;
-                state.shots.forEach(s => {
-                    sqDiffX += Math.pow(s.x - coi.x, 2);
-                    sqDiffY += Math.pow(s.y - coi.y, 2);
-                });
-                sigma = Math.sqrt(( (sqDiffX/state.shots.length) + (sqDiffY/state.shots.length) ) / 2);
+                state.shots.forEach(s => { sqDiffX += Math.pow(s.x - coi.x, 2); sqDiffY += Math.pow(s.y - coi.y, 2); });
+                // Besselsche Korrektur für Stichproben-Varianz
+                sigma = Math.sqrt(( (sqDiffX / (n - 1)) + (sqDiffY / (n - 1)) ) / 2);
             }
             const r50Mm = 1.1774 * sigma * state.pixelPerMm;
-            const r95Mm = 2.448 * sigma * state.pixelPerMm;
-
+            const r95Mm = 2.4477 * sigma * state.pixelPerMm;
             const dMmX = (coi.x - state.poa.x) * state.pixelPerMm;
             const dMmY = (state.poa.y - coi.y) * state.pixelPerMm;
-
-            return {
-                coi,
-                es: { mm: esMm, moa: toMoa(esMm, distM) },
-                mr: { mm: mrMm, moa: toMoa(mrMm, distM) },
-                r50: { mm: r50Mm, moa: toMoa(r50Mm, distM) },
-                r95: { mm: r95Mm, moa: toMoa(r95Mm, distM) },
-                offset: { 
-                    x: dMmX, y: dMmY, total: Math.hypot(dMmX, dMmY),
-                    moaX: toMoa(dMmX, distM), moaY: toMoa(dMmY, distM)
-                }
-            };
+            return { coi, es: { mm: esMm, moa: toMoa(esMm, distM) }, mr: { mm: mrMm, moa: toMoa(mrMm, distM) }, r50: { mm: r50Mm, moa: toMoa(r50Mm, distM) }, r95: { mm: r95Mm, moa: toMoa(r95Mm, distM) }, offset: { x: dMmX, y: dMmY, total: Math.hypot(dMmX, dMmY) } };
         }
 
         function updateStats() {
@@ -459,58 +358,30 @@
 
         function drawLoop() {
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            
             let cursorStyle = "default";
-            if (state.isAdjustmentActive) {
-                cursorStyle = (state.draggedShotIndex !== -1) ? "grabbing" : "grab";
-            } else if (state.isCropMode || state.isPoaSetting || state.isCalibrating) {
-                cursorStyle = "crosshair";
-            } else if (state.image) {
-                cursorStyle = "crosshair"; 
-            }
+            if (state.isAdjustmentActive) { cursorStyle = (state.draggedShotIndex !== -1) ? "grabbing" : "grab"; }
+            else if (state.isCropMode || state.isPoaSetting || state.isCalibrating || state.image) { cursorStyle = "crosshair"; }
             overlayCanvas.style.cursor = cursorStyle;
-
             if (!state.image) { requestAnimationFrame(drawLoop); return; }
-            bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
-            bCtx.drawImage(state.image, 0, 0);
-            
-            const bulInput = document.getElementById('bulletDiameter');
-            const calMm = bulInput ? parseFloat(bulInput.value) : 5.56;
-            const rPx = (calMm / state.pixelPerMm) / 2;
-            
+            bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height); bCtx.drawImage(state.image, 0, 0);
+            const rPx = ((parseFloat(document.getElementById('bulletDiameter').value) || 5.56) / state.pixelPerMm) / 2;
             if (state.calPoints.length > 0) {
                 oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 2;
-                state.calPoints.forEach(p => {
-                    oCtx.beginPath(); oCtx.moveTo(p.x-10, p.y); oCtx.lineTo(p.x+10, p.y);
-                    oCtx.moveTo(p.x, p.y-10); oCtx.lineTo(p.x, p.y+10); oCtx.stroke();
-                });
+                state.calPoints.forEach(p => { oCtx.beginPath(); oCtx.moveTo(p.x-10, p.y); oCtx.lineTo(p.x+10, p.y); oCtx.moveTo(p.x, p.y-10); oCtx.lineTo(p.x, p.y+10); oCtx.stroke(); });
             }
-
-            oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 3;
-            oCtx.beginPath();
-            oCtx.moveTo(state.poa.x-40, state.poa.y); oCtx.lineTo(state.poa.x+40, state.poa.y);
-            oCtx.moveTo(state.poa.x, state.poa.y-40); oCtx.lineTo(state.poa.x, state.poa.y+40);
-            oCtx.stroke();
-            
+            oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 3; oCtx.beginPath();
+            oCtx.moveTo(state.poa.x-40, state.poa.y); oCtx.lineTo(state.poa.x+40, state.poa.y); oCtx.moveTo(state.poa.x, state.poa.y-40); oCtx.lineTo(state.poa.x, state.poa.y+40); oCtx.stroke();
             state.shots.forEach((shot, index) => {
                 const isDragged = (state.draggedShotIndex === index);
                 oCtx.fillStyle = isDragged ? 'rgba(255, 165, 0, 0.85)' : 'rgba(173, 216, 230, 0.7)';
                 oCtx.beginPath(); oCtx.arc(shot.x, shot.y, rPx, 0, Math.PI * 2); oCtx.fill();
-                oCtx.strokeStyle = isDragged ? 'white' : 'rgba(173, 216, 230, 0.95)';
-                oCtx.lineWidth = isDragged ? 3 : 1.5; oCtx.stroke();
+                oCtx.strokeStyle = isDragged ? 'white' : 'rgba(173, 216, 230, 0.95)'; oCtx.lineWidth = isDragged ? 3 : 1.5; oCtx.stroke();
             });
-            
-            if (state.pendingShot && !state.isAdjustmentActive) {
-                oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)';
-                oCtx.beginPath(); oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2); oCtx.fill();
-                oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 2; oCtx.stroke();
-            }
-            
+            if (state.pendingShot && !state.isAdjustmentActive) { oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)'; oCtx.beginPath(); oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2); oCtx.fill(); oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 2; oCtx.stroke(); }
             const stats = calculateBallistics();
             if (stats) {
                 if (state.shots.length >= 2) {
-                    oCtx.lineWidth = 4;
-                    oCtx.setLineDash([6, 3]);
+                    oCtx.lineWidth = 4; oCtx.setLineDash([6, 3]);
                     oCtx.strokeStyle = '#22c55e'; oCtx.beginPath(); oCtx.arc(stats.coi.x, stats.coi.y, stats.r50.mm / state.pixelPerMm, 0, Math.PI * 2); oCtx.stroke();
                     oCtx.strokeStyle = '#eab308'; oCtx.beginPath(); oCtx.arc(stats.coi.x, stats.coi.y, stats.r95.mm / state.pixelPerMm, 0, Math.PI * 2); oCtx.stroke();
                     oCtx.setLineDash([]);
@@ -521,125 +392,55 @@
             drawScaleRuler();
             if (state.isCropMode && state.cropStart && state.cropEnd) {
                 oCtx.strokeStyle = '#ef4444'; oCtx.setLineDash([5, 5]); oCtx.lineWidth = 2;
-                const x = Math.min(state.cropStart.x, state.cropEnd.x), y = Math.min(state.cropStart.y, state.cropEnd.y);
-                const w = Math.abs(state.cropStart.x - state.cropEnd.x), h = Math.abs(state.cropStart.y - state.cropEnd.y);
+                const x = Math.min(state.cropStart.x, state.cropEnd.x), y = Math.min(state.cropStart.y, state.cropEnd.y), w = Math.abs(state.cropStart.x - state.cropEnd.x), h = Math.abs(state.cropStart.y - state.cropEnd.y);
                 oCtx.strokeRect(x, y, w, h); oCtx.setLineDash([]);
             }
             requestAnimationFrame(drawLoop);
         }
 
         function drawScaleRuler() {
-            const rulerLengthMm = 10;
-            const pxWidth = rulerLengthMm / state.pixelPerMm;
-            const x = 30, y = overlayCanvas.height - 30;
-            oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 3;
-            oCtx.beginPath(); oCtx.moveTo(x, y); oCtx.lineTo(x + pxWidth, y);
-            oCtx.moveTo(x, y-6); oCtx.lineTo(x, y+6);
-            oCtx.moveTo(x+pxWidth, y-6); oCtx.lineTo(x+pxWidth, y+6); oCtx.stroke();
-            oCtx.fillStyle = '#22c55e'; oCtx.font = 'bold 12px monospace';
-            oCtx.fillText(`${rulerLengthMm} mm`, x, y - 12);
+            const rulerLengthMm = 10, pxWidth = rulerLengthMm / state.pixelPerMm, x = 30, y = overlayCanvas.height - 30;
+            oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 3; oCtx.beginPath(); oCtx.moveTo(x, y); oCtx.lineTo(x + pxWidth, y); oCtx.moveTo(x, y-6); oCtx.lineTo(x, y+6); oCtx.moveTo(x+pxWidth, y-6); oCtx.lineTo(x+pxWidth, y+6); oCtx.stroke();
+            oCtx.fillStyle = '#22c55e'; oCtx.font = 'bold 12px monospace'; oCtx.fillText(`${rulerLengthMm} mm`, x, y - 12);
         }
 
         function drawLegend(stats) {
             const scale = parseFloat(document.getElementById('legendScale').value) || 1.0;
-            const lx = state.legend.x, ly = state.legend.y;
-            const lw = state.legend.w * scale;
-            const lineH = 22 * scale;
-            
-            let lineCount = 5.0; 
-            if (state.shots.length >= 2) lineCount += 2;
-            lineCount += 3.5; 
-            const calculatedH = lineCount * lineH + (30 * scale);
+            const lx = state.legend.x, ly = state.legend.y, lw = state.legend.w * scale, lineH = 22 * scale;
+            let lineCount = 5.0; if (state.shots.length >= 2) lineCount += 2;
+            lineCount += 3.5; const calculatedH = lineCount * lineH + (30 * scale);
             state.legend.h = calculatedH / scale;
-
-            oCtx.fillStyle = 'rgba(12, 12, 12, 0.96)';
-            oCtx.roundRect(lx, ly, lw, calculatedH, 6 * scale); oCtx.fill();
-            oCtx.strokeStyle = state.legend.isDragging ? '#ffffff' : 'rgba(255, 255, 255, 0.2)'; 
-            oCtx.lineWidth = 1; oCtx.stroke();
-            
-            const fSizeBold = Math.round(13 * scale);
-            const fSizeReg = Math.round(11 * scale);
-            let cy = ly + (25 * scale);
-
-            oCtx.fillStyle = 'white';
-            oCtx.font = `bold ${fSizeBold}px ui-monospace, monospace`;
-            oCtx.fillText(`ANALYSEPROTOKOLL (n = ${state.shots.length})`, lx + (15 * scale), cy); cy += lineH * 0.8;
+            oCtx.fillStyle = 'rgba(12, 12, 12, 0.96)'; oCtx.roundRect(lx, ly, lw, calculatedH, 6 * scale); oCtx.fill();
+            oCtx.strokeStyle = state.legend.isDragging ? '#ffffff' : 'rgba(255, 255, 255, 0.2)'; oCtx.lineWidth = 1; oCtx.stroke();
+            const fSizeBold = Math.round(13 * scale), fSizeReg = Math.round(11 * scale); let cy = ly + (25 * scale);
+            oCtx.fillStyle = 'white'; oCtx.font = `bold ${fSizeBold}px ui-monospace, monospace`; oCtx.fillText(`ANALYSEPROTOKOLL (n = ${state.shots.length})`, lx + (15 * scale), cy); cy += lineH * 0.8;
             oCtx.fillStyle = '#444'; oCtx.fillRect(lx + (15 * scale), cy, lw - (30 * scale), 1); cy += lineH * 1.0;
-
             const drawMetric = (label, valMm, valMoa, color = 'white') => {
-                oCtx.fillStyle = 'white'; 
-                oCtx.font = `${fSizeReg}px ui-monospace`;
-                oCtx.fillText(label.padEnd(20, ' '), lx + (15 * scale), cy);
-                oCtx.fillStyle = color;
-                oCtx.font = `bold ${fSizeReg}px ui-monospace`;
-                oCtx.fillText(`${valMm.toFixed(2)} mm`, lx + (190 * scale), cy); 
-                oCtx.fillStyle = 'white';
-                oCtx.fillText(`| ${valMoa.toFixed(3)} Winkelminuten (MOA)`, lx + (290 * scale), cy); 
-                cy += lineH;
+                oCtx.fillStyle = 'white'; oCtx.font = `${fSizeReg}px ui-monospace`; oCtx.fillText(label.padEnd(20, ' '), lx + (15 * scale), cy);
+                oCtx.fillStyle = color; oCtx.font = `bold ${fSizeReg}px ui-monospace`; oCtx.fillText(`${valMm.toFixed(2)} mm`, lx + (190 * scale), cy); 
+                oCtx.fillStyle = 'white'; oCtx.fillText(`| ${valMoa.toFixed(3)} Winkelminuten (MOA)`, lx + (290 * scale), cy); cy += lineH;
             };
-
-            drawMetric("Max. Streuung (ES):", stats.es.mm, stats.es.moa);
-            drawMetric("Mittl. Radius (MR):", stats.mr.mm, stats.mr.moa);
-            
-            if (state.shots.length >= 2) {
-                drawMetric("R50 (Median):", stats.r50.mm, stats.r50.moa, '#22c55e');
-                drawMetric("R95 (Präzision):", stats.r95.mm, stats.r95.moa, '#eab308');
-            }
-
-            cy += lineH * 0.5;
-            oCtx.fillStyle = 'white';
-            oCtx.font = `bold ${fSizeReg}px ui-monospace`;
-            oCtx.fillText("ABWEICHUNG ZENTRUM (COI) ZUM HALTEPUNKT (POA)", lx + (15 * scale), cy); cy += lineH;
-
-            oCtx.font = `${fSizeReg}px ui-monospace`;
-            oCtx.fillText(`Linear: ${stats.offset.total.toFixed(2)} mm`, lx + (15 * scale), cy);
-            oCtx.fillText(`Vektor: ${stats.offset.x.toFixed(2)} S / ${stats.offset.y.toFixed(2)} H`, lx + (190 * scale), cy);
-            cy += lineH * 1.2;
-
-            const distM = parseFloat(document.getElementById('distance').value) || 100;
-            const mradPerClick = 0.1;
-            const mmPerClick = distM * mradPerClick;
-            const clX = Math.round(stats.offset.x / mmPerClick);
-            const clY = Math.round(stats.offset.y / mmPerClick);
-            
-            oCtx.fillStyle = '#10b981';
-            oCtx.font = `bold ${fSizeBold}px ui-monospace`;
-            const labelX = Math.abs(clX) === 1 ? "Klick" : "Klicks";
-            const labelY = Math.abs(clY) === 1 ? "Klick" : "Klicks";
-            const dirX = clX > 0 ? "LINKS" : "RECHTS";
-            const dirY = clY > 0 ? "TIEF" : "HOCH";
-            
+            drawMetric("Max. Streuung (ES):", stats.es.mm, stats.es.moa); drawMetric("Mittl. Radius (MR):", stats.mr.mm, stats.mr.moa);
+            if (state.shots.length >= 2) { drawMetric("R50 (50 % Prob.):", stats.r50.mm, stats.r50.moa, '#22c55e'); drawMetric("R95 (95 % Prob.):", stats.r95.mm, stats.r95.moa, '#eab308'); }
+            cy += lineH * 0.5; oCtx.fillStyle = 'white'; oCtx.font = `bold ${fSizeReg}px ui-monospace`; oCtx.fillText("ABWEICHUNG ZENTRUM (COI) ZUM HALTEPUNKT (POA)", lx + (15 * scale), cy); cy += lineH;
+            oCtx.font = `${fSizeReg}px ui-monospace`; oCtx.fillText(`Linear: ${stats.offset.total.toFixed(2)} mm`, lx + (15 * scale), cy); oCtx.fillText(`Vektor: ${stats.offset.x.toFixed(2)} S / ${stats.offset.y.toFixed(2)} H`, lx + (190 * scale), cy); cy += lineH * 1.2;
+            const distM = parseFloat(document.getElementById('distance').value) || 100, mradPerClick = 0.1, mmPerClick = distM * mradPerClick;
+            const clX = Math.round(stats.offset.x / mmPerClick), clY = Math.round(stats.offset.y / mmPerClick);
+            oCtx.fillStyle = '#10b981'; oCtx.font = `bold ${fSizeBold}px ui-monospace`;
+            const labelX = Math.abs(clX) === 1 ? "Klick" : "Klicks", labelY = Math.abs(clY) === 1 ? "Klick" : "Klicks", dirX = clX > 0 ? "LINKS" : "RECHTS", dirY = clY > 0 ? "TIEF" : "HOCH";
             oCtx.fillText(`KORREKTUR ABSEHEN (0.1 MRAD / 1cm auf 100m):`, lx + (15 * scale), cy); cy += lineH;
-            oCtx.fillStyle = 'white';
-            oCtx.fillText(`  SEITE: ${Math.abs(clX)} ${labelX} ${dirX}`, lx + (15 * scale), cy);
-            oCtx.fillText(`  HÖHE:  ${Math.abs(clY)} ${labelY} ${dirY}`, lx + (240 * scale), cy);
+            oCtx.fillStyle = 'white'; oCtx.fillText(`  SEITE: ${Math.abs(clX)} ${labelX} ${dirX}`, lx + (15 * scale), cy); oCtx.fillText(`  HÖHE:  ${Math.abs(clY)} ${labelY} ${dirY}`, lx + (240 * scale), cy);
         }
 
         function exportToExcel() {
-            if (state.shots.length === 0) return;
-            let csv = "Treffer;X-Abw [mm];Y-Abw [mm]\n";
-            state.shots.forEach((s, i) => {
-                const dx = (s.x - state.poa.x) * state.pixelPerMm;
-                const dy = (state.poa.y - s.y) * state.pixelPerMm;
-                csv += `${i + 1};${dx.toFixed(3).replace('.', ',')};${dy.toFixed(3).replace('.', ',')}\n`;
-            });
-            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `ShotAnalyst_Messdaten.csv`;
-            link.click();
+            if (state.shots.length === 0) return; let csv = "Treffer;X-Abw [mm];Y-Abw [mm]\n";
+            state.shots.forEach((s, i) => { const dx = (s.x - state.poa.x) * state.pixelPerMm, dy = (state.poa.y - s.y) * state.pixelPerMm; csv += `${i + 1};${dx.toFixed(3).replace('.', ',')};${dy.toFixed(3).replace('.', ',')}\n`; });
+            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `ShotAnalyst_Messdaten.csv`; link.click();
         }
 
         function exportResult() {
-            const buffer = document.createElement('canvas');
-            buffer.width = baseCanvas.width; buffer.height = baseCanvas.height;
-            const ctx = buffer.getContext('2d');
-            ctx.drawImage(baseCanvas, 0, 0);
-            ctx.drawImage(overlayCanvas, 0, 0);
-            const link = document.createElement('a');
-            link.download = `ShotAnalyst_Analysebericht.jpg`;
-            link.href = buffer.toDataURL('image/jpeg', 0.95);
-            link.click();
+            const buffer = document.createElement('canvas'); buffer.width = baseCanvas.width; buffer.height = baseCanvas.height; const ctx = buffer.getContext('2d');
+            ctx.drawImage(baseCanvas, 0, 0); ctx.drawImage(overlayCanvas, 0, 0); const link = document.createElement('a'); link.download = `ShotAnalyst_Analysebericht.jpg`; link.href = buffer.toDataURL('image/jpeg', 0.95); link.click();
         }
     </script>
 </body>
