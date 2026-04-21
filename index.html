@@ -9,7 +9,7 @@
         canvas { image-rendering: auto; }
         .no-select { user-select: none; }
         
-        /* Technische Bildlaufleiste für die Seitenleiste */
+        /* Präzise Bildlaufleiste für die Seitenleiste */
         .seitenleiste-scroll::-webkit-scrollbar {
             width: 6px;
         }
@@ -17,37 +17,34 @@
             background: #09090b;
         }
         .seitenleiste-scroll::-webkit-scrollbar-thumb {
-            background: #27272a;
-            border-radius: 10px;
-        }
-        .seitenleiste-scroll::-webkit-scrollbar-thumb:hover {
             background: #3f3f46;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen max-h-screen flex items-center justify-center font-sans no-select overflow-hidden p-4 md:p-8">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen max-h-screen flex items-center justify-center font-sans no-select overflow-hidden p-2 md:p-6">
 
-    <!-- Haupt-Anwendungsrahmen (Zentriert für Full-HD) -->
-    <div class="w-full h-full max-w-[1840px] max-h-[1000px] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+    <!-- Haupt-Gehäuse (Optimiert für 1080p-Umgebungen) -->
+    <div class="w-full h-full max-w-[1880px] max-h-[92vh] bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl flex flex-col overflow-hidden">
         
         <!-- Kopfzeile (Fixiert) -->
         <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center shrink-0">
-            <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2 italic text-zinc-400">v1.0n</span></h1>
+            <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2 italic text-zinc-400">v4.9</span></h1>
             <div class="flex gap-2">
                 <input type="file" id="imageLoader" class="hidden" accept="image/*">
-                <button onclick="document.getElementById('imageLoader').click()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm transition font-medium text-white border border-zinc-700">Bild laden</button>
-                <button onclick="resetApp()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-orange-400">Rücksetzung</button>
+                <button onclick="document.getElementById('imageLoader').click()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm transition font-medium text-white border border-zinc-700">Bildmaterial laden</button>
+                <button onclick="resetApp()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-orange-400">System-Reset</button>
                 <button onclick="exportToExcel()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded text-sm transition font-medium text-green-500">Excel Export</button>
-                <button onclick="exportResult()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-bold transition text-white shadow-lg">JPG Export</button>
+                <button onclick="exportResult()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-bold transition text-white shadow-lg">JPG Bildausgabe</button>
             </div>
         </header>
 
-        <main class="flex-1 flex overflow-hidden">
-            <!-- Seitenleiste mit strikter vertikaler Aufteilung -->
+        <main class="flex-1 flex overflow-hidden min-h-0">
+            <!-- Seitenleiste mit strikter vertikaler Segmentierung -->
             <aside class="w-80 border-r border-zinc-800 bg-zinc-950 flex flex-col h-full shrink-0">
                 
-                <!-- Scrollbarer Konfigurationsbereich -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-8 seitenleiste-scroll">
+                <!-- Oberer Bereich: Dynamischer Inhalts-Scroll -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-8 seitenleiste-scroll min-h-0">
                     
                     <!-- 1. BILDVORBEREITUNG -->
                     <section class="space-y-3">
@@ -80,7 +77,7 @@
 
                     <!-- 3. PARAMETER -->
                     <section class="space-y-3">
-                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">3. Parameter</label>
+                        <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">3. Einstellwerte</label>
                         <div>
                             <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Entfernung (m)</label>
                             <input type="number" id="distance" value="100" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm font-mono text-white focus:border-red-500 outline-none">
@@ -108,7 +105,7 @@
                         <div class="space-y-2">
                             <button onclick="activatePoaSetting()" class="w-full py-2 px-3 bg-red-900/10 border border-red-500/30 rounded text-xs text-left flex justify-between items-center hover:bg-red-900/20 transition text-red-100">
                                 <span>Haltepunkt (POA) setzen</span>
-                                <span id="poaStatus" class="text-red-500 font-bold uppercase text-[10px]">Ready</span>
+                                <span id="poaStatus" class="text-red-500 font-bold uppercase text-[10px]">Bereit</span>
                             </button>
                             <button onclick="togglePoaLock()" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-left flex justify-between items-center hover:bg-zinc-700 transition text-white">
                                 <span>Position fixieren</span>
@@ -117,8 +114,8 @@
                         </div>
                     </section>
 
-                    <!-- 6. ANALYSE & JUSTAGE -->
-                    <section class="space-y-3 pb-4">
+                    <!-- 6. DATENERFASSUNG -->
+                    <section class="space-y-3">
                         <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">6. Datenerfassung</label>
                         <div class="space-y-2">
                             <div>
@@ -133,18 +130,14 @@
                             <button onclick="undoLastShot()" class="py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs transition border border-zinc-700 text-white">Rückgängig</button>
                             <button onclick="clearShots()" class="py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-xs text-red-400 transition border border-zinc-700">Löschen</button>
                         </div>
-                        
-                        <!-- Kritischer Justier-Button am Ende des Scrollbereichs -->
-                        <div class="pt-4">
-                            <button id="adjustmentBtn" onclick="toggleAdjustmentMode()" class="w-full py-3 bg-zinc-100 hover:bg-white rounded text-sm font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl">
-                                Justier-Modus
-                            </button>
-                        </div>
                     </section>
                 </div>
 
-                <!-- Fixierter Status-Bereich am Fuß der Seitenleiste -->
-                <div class="p-6 bg-zinc-900 border-t border-zinc-800 shrink-0">
+                <!-- Unterer Bereich: Fixierte Feinjustierung & Statistik -->
+                <div class="p-6 bg-zinc-900 border-t border-zinc-800 shrink-0 space-y-4 shadow-[0_-4px_12px_rgba(0,0,0,0.5)]">
+                    <button id="adjustmentBtn" onclick="toggleAdjustmentMode()" class="w-full py-3 bg-zinc-100 hover:bg-white rounded text-sm font-bold transition text-zinc-950 uppercase tracking-tighter">
+                        Feinjustierung
+                    </button>
                     <div class="flex justify-between items-center font-mono text-white">
                         <span class="text-xs uppercase text-zinc-500">Stichprobe (n):</span>
                         <span id="shotCounter" class="text-2xl font-bold text-red-500">0</span>
@@ -152,14 +145,14 @@
                 </div>
             </aside>
 
-            <!-- Analysebereich -->
-            <div class="flex-1 relative bg-black flex items-center justify-center p-8 overflow-hidden" id="viewport">
+            <!-- Zentraler Analysebereich -->
+            <div class="flex-1 relative bg-black flex items-center justify-center p-8 overflow-hidden min-w-0" id="viewport">
                 <div id="canvasStack" class="relative flex items-center justify-center transition-transform duration-200 ease-out origin-center">
                     <canvas id="baseCanvas" class="absolute shadow-2xl"></canvas>
                     <canvas id="overlayCanvas" class="absolute"></canvas>
                 </div>
                 
-                <!-- Kalibrierungs-Dialog -->
+                <!-- Kalibrierungs-Overlay -->
                 <div id="calibrationDialog" class="hidden absolute top-10 bg-zinc-950 border border-red-500 p-6 rounded-lg shadow-2xl z-50 text-white">
                     <p class="text-sm mb-3 font-bold uppercase tracking-widest text-center">Referenzstrecke (mm)</p>
                     <div class="flex items-center gap-2">
@@ -254,12 +247,12 @@
             const btn = document.getElementById('adjustmentBtn');
             const confirmBtn = document.getElementById('confirmBtn');
             if (state.isAdjustmentActive) {
-                btn.innerText = "Justier-Modus aktiv";
+                btn.innerText = "Modus Aktiv";
                 btn.className = "w-full py-3 bg-orange-600 hover:bg-orange-500 rounded text-sm font-bold transition text-white shadow-xl";
                 confirmBtn.disabled = true;
                 state.pendingShot = null;
             } else {
-                btn.innerText = "Justier-Modus aktivieren";
+                btn.innerText = "Feinjustierung";
                 btn.className = "w-full py-3 bg-zinc-100 hover:bg-white rounded text-sm font-bold transition text-zinc-950 uppercase tracking-tighter shadow-xl";
                 confirmBtn.disabled = false;
             }
@@ -408,33 +401,26 @@
         function drawLoop() {
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
             if (!state.image) { requestAnimationFrame(drawLoop); return; }
-            
             bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height); 
             bCtx.drawImage(state.image, 0, 0);
-            
             const rPx = ((parseFloat(document.getElementById('bulletDiameter').value) || 5.56) / state.pixelPerMm) / 2;
-            
             if (state.calPoints.length > 0) {
                 oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 2;
                 state.calPoints.forEach(p => { oCtx.beginPath(); oCtx.moveTo(p.x-10, p.y); oCtx.lineTo(p.x+10, p.y); oCtx.moveTo(p.x, p.y-10); oCtx.lineTo(p.x, p.y+10); oCtx.stroke(); });
             }
-            
             oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 3; oCtx.beginPath();
             oCtx.moveTo(state.poa.x-40, state.poa.y); oCtx.lineTo(state.poa.x+40, state.poa.y); oCtx.moveTo(state.poa.x, state.poa.y-40); oCtx.lineTo(state.poa.x, state.poa.y+40); oCtx.stroke();
-            
             state.shots.forEach((shot, index) => {
                 const isDragged = (state.draggedShotIndex === index);
                 oCtx.fillStyle = isDragged ? 'rgba(255, 165, 0, 0.85)' : 'rgba(173, 216, 230, 0.7)';
                 oCtx.beginPath(); oCtx.arc(shot.x, shot.y, rPx, 0, Math.PI * 2); oCtx.fill();
                 oCtx.strokeStyle = isDragged ? 'white' : 'rgba(173, 216, 230, 0.95)'; oCtx.lineWidth = isDragged ? 3 : 1.5; oCtx.stroke();
             });
-            
             if (state.pendingShot && !state.isAdjustmentActive) { 
                 oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)'; 
                 oCtx.beginPath(); oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2); oCtx.fill(); 
                 oCtx.strokeStyle = '#ef4444'; oCtx.lineWidth = 2; oCtx.stroke(); 
             }
-            
             const stats = calculateBallistics();
             if (stats) {
                 if (state.shots.length >= 2) {
@@ -447,7 +433,6 @@
                 drawLegend(stats);
             }
             drawScaleRuler();
-            
             if (state.isCropMode && state.cropStart && state.cropEnd) {
                 oCtx.strokeStyle = '#ef4444'; oCtx.setLineDash([5, 5]); oCtx.lineWidth = 2;
                 const x = Math.min(state.cropStart.x, state.cropEnd.x), y = Math.min(state.cropStart.y, state.cropEnd.y), w = Math.abs(state.cropStart.x - state.cropEnd.x), h = Math.abs(state.cropStart.y - state.cropEnd.y);
@@ -468,22 +453,18 @@
             let lineCount = 5.0; if (state.shots.length >= 2) lineCount += 2;
             lineCount += 3.5; const calculatedH = lineCount * lineH + (30 * scale);
             state.legend.h = calculatedH / scale;
-            
             oCtx.fillStyle = 'rgba(12, 12, 12, 0.96)'; 
             oCtx.roundRect(lx, ly, lw, calculatedH, 6 * scale); 
             oCtx.fill();
             oCtx.strokeStyle = state.legend.isDragging ? '#ffffff' : 'rgba(255, 255, 255, 0.2)'; 
             oCtx.lineWidth = 1; oCtx.stroke();
-            
             const fSizeBold = 13 * scale;
             const fSizeReg = 11 * scale;
             let cy = ly + (25 * scale);
-
             oCtx.fillStyle = 'white';
             oCtx.font = `bold ${fSizeBold}px "ui-monospace", monospace`;
             oCtx.fillText(`ANALYSEPROTOKOLL (n = ${state.shots.length})`, lx + (15 * scale), cy); cy += lineH * 0.8;
             oCtx.fillStyle = '#444'; oCtx.fillRect(lx + (15 * scale), cy, lw - (30 * scale), 1); cy += lineH * 1.0;
-
             const drawMetric = (label, valMm, valMoa, color = 'white') => {
                 oCtx.fillStyle = 'white'; 
                 oCtx.font = `${fSizeReg}px "ui-monospace", monospace`; 
@@ -492,35 +473,28 @@
                 oCtx.font = `bold ${fSizeReg}px "ui-monospace", monospace`;
                 oCtx.fillText(`${valMm.toFixed(2)} mm`, lx + (190 * scale), cy); 
                 oCtx.fillStyle = 'white';
-                oCtx.fillText(`| ${valMoa.toFixed(3)} Winkelminuten (MOA)`, lx + (290 * scale), cy); cy += lineH;
+                oCtx.fillText(`| ${valMoa.toFixed(3)} MOA`, lx + (290 * scale), cy); cy += lineH;
             };
-            
             drawMetric("Max. Streuung (ES):", stats.es.mm, stats.es.moa); 
             drawMetric("Mittl. Radius (MR):", stats.mr.mm, stats.mr.moa);
-            
             if (state.shots.length >= 2) { 
                 drawMetric("R50 (50 % Prob.):", stats.r50.mm, stats.r50.moa, '#22c55e'); 
                 drawMetric("R95 (95 % Prob.):", stats.r95.mm, stats.r95.moa, '#eab308'); 
             }
-            
             cy += lineH * 0.5; 
             oCtx.fillStyle = 'white'; 
             oCtx.font = `bold ${fSizeReg}px "ui-monospace", monospace`; 
             oCtx.fillText("ABWEICHUNG ZENTRUM (COI) ZUM HALTEPUNKT (POA)", lx + (15 * scale), cy); cy += lineH;
-            
             oCtx.font = `${fSizeReg}px "ui-monospace", monospace`; 
             oCtx.fillText(`Linear: ${stats.offset.total.toFixed(2)} mm`, lx + (15 * scale), cy); 
             oCtx.fillText(`Vektor: ${stats.offset.x.toFixed(2)} S / ${stats.offset.y.toFixed(2)} H`, lx + (190 * scale), cy); 
             cy += lineH * 1.2;
-            
             const distM = parseFloat(document.getElementById('distance').value) || 100, mradPerClick = 0.1, mmPerClick = distM * mradPerClick;
             const clX = Math.round((stats.coi.x - state.poa.x) * state.pixelPerMm / mmPerClick), clY = Math.round((state.poa.y - stats.coi.y) * state.pixelPerMm / mmPerClick);
-            
             oCtx.fillStyle = '#10b981'; 
             oCtx.font = `bold ${fSizeBold}px "ui-monospace", monospace`;
             const labelX = Math.abs(clX) === 1 ? "Klick" : "Klicks", labelY = Math.abs(clY) === 1 ? "Klick" : "Klicks", dirX = clX > 0 ? "LINKS" : "RECHTS", dirY = clY > 0 ? "TIEF" : "HOCH";
-            
-            oCtx.fillText(`KORREKTUR ABSEHEN (0.1 MRAD / 1cm auf 100m):`, lx + (15 * scale), cy); cy += lineH;
+            oCtx.fillText(`KORREKTUR ABSEHEN (0.1 MRAD):`, lx + (15 * scale), cy); cy += lineH;
             oCtx.fillStyle = 'white'; 
             oCtx.fillText(`  SEITE: ${Math.abs(clX)} ${labelX} ${dirX}`, lx + (15 * scale), cy); 
             oCtx.fillText(`  HÖHE:  ${Math.abs(clY)} ${labelY} ${dirY}`, lx + (240 * scale), cy);
@@ -534,12 +508,11 @@
 
         function exportResult() {
             const buffer = document.createElement('canvas'); 
-            buffer.width = state.image.width; 
-            buffer.height = state.image.height; 
+            buffer.width = state.image.width; buffer.height = state.image.height; 
             const ctx = buffer.getContext('2d');
             ctx.drawImage(baseCanvas, 0, 0, baseCanvas.width, baseCanvas.height, 0, 0, buffer.width, buffer.height); 
             ctx.drawImage(overlayCanvas, 0, 0, overlayCanvas.width, overlayCanvas.height, 0, 0, buffer.width, buffer.height); 
-            const link = document.createElement('a'); link.download = `ShotAnalyst_Analysebericht.jpg`; link.href = buffer.toDataURL('image/jpeg', 0.95); link.click();
+            const link = document.createElement('a'); link.download = `ShotAnalyst_Bericht.jpg`; link.href = buffer.toDataURL('image/jpeg', 0.95); link.click();
         }
     </script>
 </body>
