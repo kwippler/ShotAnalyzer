@@ -1,0 +1,66 @@
+Dokumentation: ShotAnalyst
+
+Übersicht
+
+Der ShotAnalyst ist ein digitales Messwerkzeug zur metrologischen Untersuchung von Schussgruppen auf Basis von optischen Erfassungsdaten (Bilddateien). Das Werkzeug ermöglicht eine präzise Bestimmung ballistischer Kennwerte unter Berücksichtigung von Abbildungsmaßstab und statistischen Verteilungsmodellen.
+
+Funktionsumfang
+
+1. Bildvorbereitung & Metrologie
+
+Bildzuschnitt: Reduktion des Sichtfeldes auf den relevanten Bereich zur Erhöhung der Übersichtlichkeit. Eine Rücksetzung auf den Originalzustand ist jederzeit möglich.
+
+Maßstabskalierung: Manuelle Kalibrierung des Pixel-zu-Millimeter-Verhältnis durch Definition einer bekannten Referenzstrecke. Dies ist die Grundlage für alle folgenden Längenmessungen.
+
+2. Datenerfassung
+
+Treffermarkierung: Optische Markierung der Einschläge unter Berücksichtigung des Nenn-Kalibers.
+
+Vorschau-Modus: Neue Treffer werden vor der Bestätigung rot hervorgehoben, um Positionierungsfehler zu minimieren.
+
+Justier-Modus: Ermöglicht die nachträgliche Feinpositionierung bereits gesetzter Markierungen per Greif-Interaktion.
+
+Referenzierung (POA): Festlegung des Haltepunktes (Point of Aim) zur Berechnung der Treffpunktablage.
+
+3. Statistische Auswertung
+
+Das System berechnet automatisch folgende Kennwerte:
+
+Extremstreuung (ES): Maximaler Abstand zwischen den zwei am weitesten voneinander entfernten Treffermittelpunkten.
+
+Mittlerer Radius (MR): Arithmetisches Mittel der Abstände aller Treffer zum gemeinsamen Schwerpunkt (COI - Center of Impact).
+
+Konfidenzintervalle (R50 / R95): Berechnung der Radien, in denen die Treffer mit einer Wahrscheinlichkeit von 50 % bzw. 95 % liegen.
+
+Winkelminuten (MOA): Umrechnung der linearen Streuung in winkelabhängige Maße basierend auf der eingegebenen Distanz.
+
+4. Absehen-Korrektur
+
+Berechnung der notwendigen Korrekturwerte für die Zieloptik.
+
+Ausgabe in Rastschritten (Klicks) basierend auf einer Standard-Verstellung von 0,1 mrad (entspricht 1 cm auf 100 m).
+
+Mathematische Grundlagen
+
+Statistische Varianz
+
+Zur Schätzung der Standardabweichung $\sigma$ wird die Besselsche Korrektur angewandt, um die unverzerrte Stichprobenvarianz bei kleinen Fallzahlen ($n$) zu gewährleisten:
+
+
+$$s = \sqrt{\frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2}$$
+
+Rayleigh-Modell
+
+Die Berechnung der Wahrscheinlichkeitsradien erfolgt nach der Rayleigh-Verteilung für zweidimensionale isotrope Fehler:
+
+$R_{50} \approx 1,1774 \cdot \sigma$
+
+$R_{95} \approx 2,4477 \cdot \sigma$
+
+Datenausgabe
+
+Excel/CSV-Export: Tabellarische Auflistung aller Koordinaten und Abweichungen für die weitere Verarbeitung in Tabellenkalkulationsprogrammen.
+
+Bild-Export: Sicherung des analysierten Schussbildes inklusive Legende und statistischer Overlays als JPG-Datei.
+
+Hinweis: Dieses Werkzeug läuft vollständig lokal im Webbrowser. Es werden keine Bilddaten auf externe Server übertragen.
