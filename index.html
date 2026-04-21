@@ -9,6 +9,9 @@
         canvas { image-rendering: auto; }
         .no-select { user-select: none; }
         
+        /* Fadenkreuz-Cursor für den Analysebereich */
+        #overlayCanvas { cursor: crosshair; }
+
         .panel-scroll::-webkit-scrollbar {
             width: 4px;
         }
@@ -29,7 +32,7 @@
         <!-- Kopfzeile -->
         <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center shrink-0">
             <div class="flex items-center gap-4">
-                <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-1 italic text-zinc-400">v5.1r</span></h1>
+                <h1 class="text-xl font-bold tracking-tight text-red-500 uppercase">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-1 italic text-zinc-400">v5.2</span></h1>
             </div>
             <div class="flex gap-2">
                 <input type="file" id="imageLoader" class="hidden" accept="image/*">
@@ -142,7 +145,7 @@
                             <span id="shotCounter" class="text-xl font-bold text-red-500 leading-none">0</span>
                         </div>
                     </div>
-                1</div>
+                </div>
             </aside>
 
             <!-- Analysebereich -->
