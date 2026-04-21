@@ -10,7 +10,7 @@
 
     <!-- Kopfzeile -->
     <header class="p-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
-        <h1 class="text-xl font-bold tracking-tight text-red-500">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2">v3.8 Absehen-Korrektur</span></h1>
+        <h1 class="text-xl font-bold tracking-tight text-red-500">ShotAnalyst <span class="text-xs text-zinc-500 font-normal ml-2">v4.2 Vorschau-Erweiterung</span></h1>
         <div class="flex gap-2">
             <input type="file" id="imageLoader" class="hidden" accept="image/*">
             <button onclick="document.getElementById('imageLoader').click()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm transition font-medium text-white">Bild laden</button>
@@ -57,7 +57,7 @@
             <section class="space-y-3">
                 <label class="text-xs uppercase tracking-widest text-zinc-500 font-bold">3. Parameter</label>
                 <div>
-                    <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter">Schussentfernung (m)</label>
+                    <label class="block text-[11px] text-zinc-500 mb-1 uppercase tracking-tighter text-white">Schussentfernung (m)</label>
                     <input type="number" id="distance" value="100" onchange="updateStats()" class="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-sm font-mono text-white focus:border-red-500 outline-none">
                 </div>
             </section>
@@ -156,7 +156,8 @@
             draggedShotIndex: -1,
             legend: { 
                 x: 50, y: 50, 
-                w: 500, h: 100, 
+                w: 550, 
+                h: 100, 
                 isDragging: false, 
                 dragOff: { x: 0, y: 0 } 
             }
@@ -454,7 +455,17 @@
 
         function drawLoop() {
             oCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            overlayCanvas.style.cursor = state.isAdjustmentActive ? "grab" : (state.isCropMode ? "crosshair" : "default");
+            
+            let cursorStyle = "default";
+            if (state.isAdjustmentActive) {
+                cursorStyle = (state.draggedShotIndex !== -1) ? "grabbing" : "grab";
+            } else if (state.isCropMode || state.isPoaSetting || state.isCalibrating) {
+                cursorStyle = "crosshair";
+            } else if (state.image) {
+                cursorStyle = "crosshair"; 
+            }
+            overlayCanvas.style.cursor = cursorStyle;
+
             if (!state.image) { requestAnimationFrame(drawLoop); return; }
             bCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
             bCtx.drawImage(state.image, 0, 0);
@@ -479,26 +490,38 @@
             
             state.shots.forEach((shot, index) => {
                 const isDragged = (state.draggedShotIndex === index);
-                oCtx.fillStyle = isDragged ? 'rgba(255, 165, 0, 0.7)' : 'rgba(173, 216, 230, 0.45)';
+                oCtx.fillStyle = isDragged ? 'rgba(255, 165, 0, 0.85)' : 'rgba(173, 216, 230, 0.7)';
                 oCtx.beginPath(); oCtx.arc(shot.x, shot.y, rPx, 0, Math.PI * 2); oCtx.fill();
-                oCtx.strokeStyle = isDragged ? 'white' : 'rgba(173, 216, 230, 0.9)';
-                oCtx.lineWidth = isDragged ? 2 : 1; oCtx.stroke();
+                oCtx.strokeStyle = isDragged ? 'white' : 'rgba(173, 216, 230, 0.95)';
+                oCtx.lineWidth = isDragged ? 3 : 1.5; oCtx.stroke();
             });
+            
+            // --- VORSCHAU FÜR FRISCH DEFINIERTEN TREFFER ---
+            if (state.pendingShot && !state.isAdjustmentActive) {
+                oCtx.fillStyle = 'rgba(239, 68, 68, 0.35)'; // Hellrote transluzente Fläche
+                oCtx.beginPath();
+                oCtx.arc(state.pendingShot.x, state.pendingShot.y, rPx, 0, Math.PI * 2);
+                oCtx.fill();
+                oCtx.strokeStyle = '#ef4444';
+                oCtx.lineWidth = 2;
+                oCtx.stroke();
+            }
             
             const stats = calculateBallistics();
             if (stats) {
                 if (state.shots.length >= 2) {
-                    oCtx.setLineDash([4, 2]);
+                    oCtx.lineWidth = 4;
+                    oCtx.setLineDash([6, 3]);
                     oCtx.strokeStyle = '#22c55e'; oCtx.beginPath(); oCtx.arc(stats.coi.x, stats.coi.y, stats.r50.mm / state.pixelPerMm, 0, Math.PI * 2); oCtx.stroke();
                     oCtx.strokeStyle = '#eab308'; oCtx.beginPath(); oCtx.arc(stats.coi.x, stats.coi.y, stats.r95.mm / state.pixelPerMm, 0, Math.PI * 2); oCtx.stroke();
                     oCtx.setLineDash([]);
                 }
-                oCtx.fillStyle = '#f97316'; oCtx.beginPath(); oCtx.arc(stats.coi.x, stats.coi.y, 5, 0, Math.PI * 2); oCtx.fill();
+                oCtx.fillStyle = '#f97316'; oCtx.beginPath(); oCtx.arc(stats.coi.x, stats.coi.y, 6, 0, Math.PI * 2); oCtx.fill();
                 drawLegend(stats);
             }
             drawScaleRuler();
             if (state.isCropMode && state.cropStart && state.cropEnd) {
-                oCtx.strokeStyle = '#ef4444'; oCtx.setLineDash([5, 5]);
+                oCtx.strokeStyle = '#ef4444'; oCtx.setLineDash([5, 5]); oCtx.lineWidth = 2;
                 const x = Math.min(state.cropStart.x, state.cropEnd.x), y = Math.min(state.cropStart.y, state.cropEnd.y);
                 const w = Math.abs(state.cropStart.x - state.cropEnd.x), h = Math.abs(state.cropStart.y - state.cropEnd.y);
                 oCtx.strokeRect(x, y, w, h); oCtx.setLineDash([]);
@@ -510,12 +533,12 @@
             const rulerLengthMm = 10;
             const pxWidth = rulerLengthMm / state.pixelPerMm;
             const x = 30, y = overlayCanvas.height - 30;
-            oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 2;
+            oCtx.strokeStyle = '#22c55e'; oCtx.lineWidth = 3;
             oCtx.beginPath(); oCtx.moveTo(x, y); oCtx.lineTo(x + pxWidth, y);
-            oCtx.moveTo(x, y-5); oCtx.lineTo(x, y+5);
-            oCtx.moveTo(x+pxWidth, y-5); oCtx.lineTo(x+pxWidth, y+5); oCtx.stroke();
+            oCtx.moveTo(x, y-6); oCtx.lineTo(x, y+6);
+            oCtx.moveTo(x+pxWidth, y-6); oCtx.lineTo(x+pxWidth, y+6); oCtx.stroke();
             oCtx.fillStyle = '#22c55e'; oCtx.font = 'bold 12px monospace';
-            oCtx.fillText(`${rulerLengthMm} mm`, x, y - 10);
+            oCtx.fillText(`${rulerLengthMm} mm`, x, y - 12);
         }
 
         function drawLegend(stats) {
@@ -524,9 +547,9 @@
             const lw = state.legend.w * scale;
             const lineH = 22 * scale;
             
-            let lineCount = 4.5; 
+            let lineCount = 5.0; 
             if (state.shots.length >= 2) lineCount += 2;
-            lineCount += 2.5; 
+            lineCount += 3.5; 
             const calculatedH = lineCount * lineH + (30 * scale);
             state.legend.h = calculatedH / scale;
 
@@ -550,9 +573,9 @@
                 oCtx.fillText(label.padEnd(20, ' '), lx + (15 * scale), cy);
                 oCtx.fillStyle = color;
                 oCtx.font = `bold ${fSizeReg}px ui-monospace`;
-                oCtx.fillText(`${valMm.toFixed(2)} mm`, lx + (170 * scale), cy);
+                oCtx.fillText(`${valMm.toFixed(2)} mm`, lx + (190 * scale), cy); 
                 oCtx.fillStyle = 'white';
-                oCtx.fillText(`| ${valMoa.toFixed(3)} Winkelmin. (MOA)`, lx + (265 * scale), cy);
+                oCtx.fillText(`| ${valMoa.toFixed(3)} Winkelminuten (MOA)`, lx + (290 * scale), cy); 
                 cy += lineH;
             };
 
@@ -571,7 +594,7 @@
 
             oCtx.font = `${fSizeReg}px ui-monospace`;
             oCtx.fillText(`Linear: ${stats.offset.total.toFixed(2)} mm`, lx + (15 * scale), cy);
-            oCtx.fillText(`Vektor: ${stats.offset.x.toFixed(2)} S / ${stats.offset.y.toFixed(2)} H`, lx + (170 * scale), cy);
+            oCtx.fillText(`Vektor: ${stats.offset.x.toFixed(2)} S / ${stats.offset.y.toFixed(2)} H`, lx + (190 * scale), cy);
             cy += lineH * 1.2;
 
             const distM = parseFloat(document.getElementById('distance').value) || 100;
@@ -587,10 +610,10 @@
             const dirX = clX > 0 ? "LINKS" : "RECHTS";
             const dirY = clY > 0 ? "TIEF" : "HOCH";
             
-            oCtx.fillText(`KORREKTUR ABSEHEN (0.1 MRAD):`, lx + (15 * scale), cy); cy += lineH;
+            oCtx.fillText(`KORREKTUR ABSEHEN (0.1 MRAD / 1cm auf 100m):`, lx + (15 * scale), cy); cy += lineH;
             oCtx.fillStyle = 'white';
             oCtx.fillText(`  SEITE: ${Math.abs(clX)} ${labelX} ${dirX}`, lx + (15 * scale), cy);
-            oCtx.fillText(`  HÖHE:  ${Math.abs(clY)} ${labelY} ${dirY}`, lx + (200 * scale), cy);
+            oCtx.fillText(`  HÖHE:  ${Math.abs(clY)} ${labelY} ${dirY}`, lx + (240 * scale), cy);
         }
 
         function exportToExcel() {
